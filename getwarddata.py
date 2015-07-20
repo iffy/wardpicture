@@ -6,7 +6,9 @@ import json
 import sys
 import time
 import argparse
+from collections import defaultdict
 from filepath import FilePath
+from jinja2 import Environment, FileSystemLoader
 
 
 class ValueGetters(object):
@@ -208,10 +210,264 @@ class LDSClient(object):
                     print 'no photo for', member_id
             time.sleep(0.5)
 
+
+
+abbreviations = [
+    ('Relief Society', 'RS'),
+    ('Visiting Teaching', 'VT'),
+    ('Young Women', 'YW'),
+    ('Young Men', 'YM'),
+    ('Elders Quorum', 'EQ'),
+    ('High Priests Group', 'HP'),
+    ('High Priests', 'HP'),
+    ('Home Teaching', 'HT'),
+    (' Member', ''),
+    ('First', '1st'),
+    ('Second', '2nd'),
+    ('Secretary', 'Sec.'),
+    ('Sunday School', 'SS'),
+    ('President', 'Pres.'),
+    ('Supervisor', 'Sup.'),
+
+    # IDs
+    ('AARONIC_PRIESTHOOD_QUORUM_ADVISERS', 'Aaronic Advisers'),
+    ('ACTIVITIES_AND_SPORTS_YOUNG_WOMEN', 'YW Act, & Sports'),
+    ('ACTIVITY_DAYS', 'Activity Days'),
+    ('BEAR_DEN', 'Bears'),
+    ('BEEHIVE_PRESIDENCY', 'Beehive Presidency'),
+    ('BISHOPRIC', 'Bishopric'),
+    ('BOY_SCOUTS', 'Scouts'),
+    ('CUB_SCOUTS', 'Cubs'),
+    ('COMPASSIONATE_SERVICE', 'Compassionate Service'),
+    ('COURSE', 'Course'),
+    ('DEACONS_QUORUM_PRESIDENCY', 'Decons Presidency'),
+    ('ELDERS_QUORUM_PRESIDENCY', 'EQ Presidency'),
+    ('ELEVEN_YEAR_OLD_SCOUTS', '11-year-old Scouts'),
+    ('EMPLOYMENT_AND_WELFARE_STAKE', 'Stake Employment and Welfare'),
+    ('EMPLOYMENT_AND_WELFARE_WARD_BRANCH', 'Ward Employment and Welfare'),
+    ('FACILITIES_WARD_BRANCH', 'Ward Facilities'),
+    ('TEMPLE_AND_FAMILY_HISTORY', 'Temple and Family History'),
+    ('FAMILY_HISTORY', 'Family History'),
+    ('GOSPEL_DOCTRINE', 'Gospel Doctrine'),
+    ('HIGH_COUNCIL', 'High Council'),
+    ('HOME_TEACHING_DISTRICT_SUPERVISORS_ELDERS_QUORUM', 'EQ HT'),
+    ('HOME_TEACHING_DISTRICT_SUPERVISORS_HIGH_PRIESTS_GROUP', 'HP HT'),
+    ('INSTRUCTORS_ELDERS_QUORUM', 'EQ Instructors'),
+    ('INSTRUCTORS_HIGH_PRIESTS_GROUP', 'HP Instructors'),
+    ('HIGH_PRIESTS_GROUP_LEADERSHIP', 'HP Leadership'),
+    ('HIGH_PRIESTS_GROUP', 'HP'),
+    ('LAUREL_PRESIDENCY', 'Laurel Presidency'),
+    ('LIBRARY', 'Library'),
+    ('MEETINGS', 'Meetings'),
+    ('MIA_MAID_PRESIDENCY', 'Mia Maid Presidency'),
+    ('MISSIONARY_PREPARATION', 'Mission Prep'),
+    ('MUSIC_PRIMARY', 'Primary Music'),
+    ('MUSIC_RELIEF_SOCIETY', 'RS Music'),
+    ('MUSIC_STAKE', 'Stake Music'),
+    ('MUSIC_WARD_BRANCH', 'Ward Music'),
+    ('NURSERY', 'Nursery'),
+    ('OTHER_CALLINGS', 'Other'),
+    ('PRIESTS_QUORUM_PRESIDENCY', 'Priests Presidency'),
+    ('PRIMARY_PRESIDENCY', 'Primary Presidency'),
+    ('STAKE_PRIMARY_PRESIDENCY', 'Stake Primary'),
+    ('PRIMARY', 'Primary'),
+    ('RELIEF_SOCIETY_PRESIDENCY', 'RS Presidency'),
+    ('RELIEF_SOCIETY', 'RS'),
+    ('STAKE_YOUNG_MEN_PRESIDENCY', 'Stake YM'),
+    ('STAKE_YOUNG_WOMEN_PRESIDENCY', 'Stake YW'),
+    ('SUNBEAM', 'Sunbeam'),
+    ('UNASSIGNED_TEACHERS_SUNDAY_SCHOOL', 'Unassigned Teachers'),
+    ('SUNDAY_SCHOOL_PRESIDENCY', 'SS Presidency'),
+    ('SUNDAY_SCHOOL', 'Sunday School'),
+    ('TEACHERS_QUORUM_PRESIDENCY', 'Teachers Presidency'),
+    ('TEACHERS', 'Teachers'),
+    ('TECHNOLOGY_WARD_BRANCH', 'Ward Tech'),
+    ('VALIANT_10', 'Valiant 10'),
+    ('VALIANT_11', 'Valiant 11'),
+    ('VALIANT_8', 'Valiant 8'),
+    ('VALIANT_9', 'Valiant 9'),
+    ('VARSITY', 'Varsity'),
+    ('VENTURING', 'Venturing'),
+    ('VISITING_TEACHING', 'VT'),
+    ('WARD_MISSIONARIES', 'Ward Missionaries'),
+    ('WEBELOS_DEN', 'Webelos'),
+    ('WOLF_DEN', 'Wolf'),
+    ('YOUNG_MEN_PRESIDENCY', 'YM Presidency'),
+    ('YOUNG_SINGLE_ADULT_WARD_BRANCH', 'YSA'),
+    ('YOUNG_WOMEN_CLASS_ADVISERS', 'YW Class Advisers'),
+    ('YOUNG_WOMEN_PRESIDENCY', 'YW Presidency'),
+    ('YOUNG_WOMEN', 'YW'),
+    ('_', ' '),
+]
+
+prefOrder = '''
+# Primary
+PRIMARY_PRESIDENCY
+PRIMARY
+NURSERY
+SUNBEAM
+CTR_4
+CTR_5
+CTR_6
+CTR_7
+VALIANT_8
+VALIANT_9
+VALIANT_10
+VALIANT_11
+COURSE_13
+COURSE_15
+
+# YW
+YOUNG_WOMEN_PRESIDENCY
+YOUNG_WOMEN_CLASS_ADVISERS
+YOUNG_WOMEN
+BEEHIVE_PRESIDENCY
+MIA_MAID_PRESIDENCY
+LAUREL_PRESIDENCY
+ACTIVITIES_AND_SPORTS_YOUNG_WOMEN
+
+# YM
+YOUNG_MEN_PRESIDENCY
+AARONIC_PRIESTHOOD_QUORUM_ADVISERS
+DEACONS_QUORUM_PRESIDENCY
+TEACHERS_QUORUM_PRESIDENCY
+PRIESTS_QUORUM_PRESIDENCY
+
+# Scouts
+BOY_SCOUTS
+ELEVEN_YEAR_OLD_SCOUTS
+VARSITY
+VENTURING
+
+# Cubs
+ACTIVITY_DAYS
+CUB_SCOUTS
+BEAR_DEN
+WOLF_DEN
+WEBELOS_DEN
+BISHOPRIC
+
+# RS
+RELIEF_SOCIETY_PRESIDENCY
+RELIEF_SOCIETY
+VISITING_TEACHING
+TEACHERS
+COMPASSIONATE_SERVICE
+MUSIC_RELIEF_SOCIETY
+MEETINGS
+
+# HP
+HIGH_PRIESTS_GROUP_LEADERSHIP
+HIGH_PRIESTS_GROUP
+HOME_TEACHING_DISTRICT_SUPERVISORS_HIGH_PRIESTS_GROUP
+INSTRUCTORS_HIGH_PRIESTS_GROUP
+
+# Elders
+ELDERS_QUORUM_PRESIDENCY
+HOME_TEACHING_DISTRICT_SUPERVISORS_ELDERS_QUORUM
+INSTRUCTORS_ELDERS_QUORUM
+
+# Missionary
+WARD_MISSIONARIES
+
+FAMILY_HISTORY
+TEMPLE_AND_FAMILY_HISTORY
+
+EMPLOYMENT_AND_WELFARE_STAKE
+EMPLOYMENT_AND_WELFARE_WARD_BRANCH
+FACILITIES_WARD_BRANCH
+
+# Sunday School
+SUNDAY_SCHOOL_PRESIDENCY
+SUNDAY_SCHOOL
+GOSPEL_DOCTRINE
+MISSIONARY_PREPARATION
+UNASSIGNED_TEACHERS_SUNDAY_SCHOOL
+LIBRARY
+
+# Stake
+HIGH_COUNCIL
+STAKE_YOUNG_MEN_PRESIDENCY
+STAKE_YOUNG_WOMEN_PRESIDENCY
+STAKE_PRIMARY_PRESIDENCY
+MUSIC_STAKE
+
+# Music
+MUSIC_WARD_BRANCH
+MUSIC_PRIMARY
+
+# Other
+OTHER_CALLINGS
+TECHNOLOGY_WARD_BRANCH
+YOUNG_SINGLE_ADULT_WARD_BRANCH
+'''.split('\n')
+
+def sortbyPref(pref):
+    def getIndex(a):
+        try:
+            return pref.index(a)
+        except:
+            return len(pref)
+    def compare(x, y):
+        xi = getIndex(x)
+        yi = getIndex(y)
+        if xi == yi:
+            # alphabetical
+            return cmp(x, y)
+        else:
+            return cmp(xi, yi)
+    return compare
+
+def abbreviateCalling(x):
+    if x is None:
+        return x
+    for l, s in abbreviations:
+        x = x.replace(l, s)
+    return x
+
+def mapCallings(client, data_dir='data', template_root='templates'):
+    data_fp = FilePath(data_dir)
+    output_root = data_fp.child('output')
+    if not output_root.exists():
+        output_root.makedirs()
+    jenv = Environment(loader=FileSystemLoader(template_root))
+    jenv.filters['abbr'] = abbreviateCalling
+    template = jenv.get_template('callingmap.html')
+    
+    #members = client.getRawValue('member_list')
+    callings = client.getRawValue('members_with_callings')
+    no_calling = client.getRawValue('members_without_callings')
+    no_calling = [x for x in no_calling if x['age'] >= 12]
+
+    calling_counts = defaultdict(lambda:0)
+    orgs = []
+    sub_org_callings = defaultdict(list)
+    missing_callings = []
+    for calling in callings:
+        sub_org_callings[calling['subOrgType']].append(calling)
+        calling_counts[calling['id']] += 1
+
+    for key in sorted(sub_org_callings.keys(), sortbyPref(prefOrder)):
+        orgs.append({
+            'subtype': key,
+            'callings': sub_org_callings[key],
+        })
+        print key
+
+    fp = output_root.child('callingmap.html')
+    fp.setContent(template.render(
+        organizations=orgs,
+        missing=missing_callings,
+        calling_counts=calling_counts,
+        no_calling=no_calling).encode('utf-8'))
+    print 'wrote', fp.path
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--update-photos', '-p', dest='update_photos', action='store_true')
+    parser.add_argument('--template-dir', '-t', dest='template_dir', default='templates')
     parser.add_argument('--username', '-u', dest='username')
 
     parser.add_argument('data_dir', nargs='?', default='data')
@@ -232,4 +488,6 @@ if __name__ == '__main__':
         client.updatePhotos()
     else:
         print 'skipping photo update (pass --update-photos if you want to update them)'
+
+    mapCallings(client, args.data_dir, args.template_dir)
 

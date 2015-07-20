@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <link type="text/css" href="../../style.css" rel="stylesheet" />
+</head>
+<body>
+
+<div class="organizations">
+  {% for org in organizations %}
+  <div class="org">
+    <div class="org-title">{{ org.subtype|abbr }}</div>
+    <div class="org-people">
+      {% for calling in org.callings %}
+        <div class="person">
+          <div class="person-image" style="background-image: url(../photos/solo-{{ calling.id }}-large.jpg);">
+            
+          </div>
+          <div class="calling-position">
+            {{ calling.position|abbr }}
+          </div>
+          <div class="person-name">
+            {{ calling.spokenName }}
+          </div>
+          {% if calling_counts[calling.id] > 1 %}
+          <div class="has-other-calling"></div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="org">
+    <div class="org-title">No calling</div>
+    <div class="org-people">
+    {% for member in no_calling %}
+      <div class="person">
+        <div class="person-image" style="background-image: url(../photos/solo-{{ member.id }}-large.jpg);"></div>
+        <div class="person-name">
+          {{ member.spokenName }}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+
+</div>
+
+</body>
+</html>
