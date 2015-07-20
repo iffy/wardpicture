@@ -1,3 +1,6 @@
+* {
+  box-sizing: border-box;
+}
 .page-break {
   clear: both;
   page-break-after: always;
@@ -18,40 +21,53 @@
   margin-bottom: 1rem;
   white-space: nowrap;
   z-index: 1;
+  color: darkgrey;
 }
 .org-name.on-top {
   z-index: 2;
 }
-.org-name.odd {
-}
-.org-name.even {
-  min-width: 1.1in;
-}
 .person {
-  border: 0px solid lightgrey;
-  border-width: 1px 0;
-  background: rgba(0, 0, 0, 0.02);
+  border: 0px solid black;
+  border-width: 0px 0;
   margin: 0;
   padding: 0in;
   width: 0.9in;
   position: relative;
   margin-top: 1.5rem;
-  height: 1.3in;
+  height: 1.25in;
   float: left;
   page-break-inside: avoid;
+  box-sizing: border-box;
 }
 .person.start {
-  border-left: 6px solid lightgrey;
 }
-.person:last-child {
-  border-right-width: 1px;
+.person.end {
+  margin-right: 1rem;
 }
 .person.no-calling {
-  height: 1.3in;
+  height: 0.9in;
+  margin-top: 0;
+}
+.person.no-calling .person-name {
+  top: 0.2in;
+}
+.person.odd {
+  background-color: rgba(0, 0, 0, 0.15);
+}
+.person.even {
+  background-color: white;
+  border-top-width: 2px;
+  border-bottom-width: 2px;
+}
+.person.even.start {
+  border-left-width: 2px;
+}
+.person.even.end {
+  border-right-width: 2px;
 }
 .person-image {
   height: 0.9in;
-  width: 0.9in;
+  /*width: 0.9in;*/
   background-image: url(../../greycircle.png);
   background-size: cover;
   background-repeat: no-repeat;
@@ -62,21 +78,23 @@
 .calling-position {
   text-align: center;
   font-family: Helvetica;
-  font-size: 0.9rem;
+  font-size: 10pt;
   padding: 0 0.1rem;
 }
 .has-other-calling {
   position: absolute;
   border: 1px solid black;
-  width: 10px;
-  height: 10px;
-  border-radius: 10px;
+  background: black;
+  width: 4px;
+  height: 4px;
+  border-radius: 100px;
   top: 1px;
   left: 1px;
+  z-index: 3;
 }
 .person-name {
   position: absolute;
-  bottom: 0.3in;
+  bottom: 0.1in;
   left: 0;
   text-align: center;
   width: 0.9in;

@@ -15,6 +15,7 @@
     {% for calling in org.callings %}
       {% set new_org = (last_org != org.subtype) %}
       {% set last_org = org.subtype %}
+      {% set last_in_org = loop.last %}
 
       {% if new_org %}
         {% set odd_even = odd_even_cycler.next() %}
@@ -24,8 +25,8 @@
       {% elif org.subtype in linebreak_before and new_org %}
         <div class="line-break"></div>
       {% endif %}
-      <div class="person {% if new_org %}start{% endif %}">
-        <div class="org-name {{ odd_even }} {% if new_org %}on-top{% endif %}">
+      <div class="person {% if new_org %}start{% endif %} {{ odd_even }} {% if last_in_org %}end{% endif %}">
+        <div class="org-name {% if new_org %}on-top{% endif %}">
         {% if new_org %}
           {{ org.subtype|abbr }}
         {% endif %}
@@ -48,10 +49,9 @@
   {% set odd_even = odd_even_cycler.next() %}
   <div class="page-break"></div>
 
+  <div>No calling</div>
   {% for member in no_calling %}
     <div class="person {% if loop.first %}start{% endif %} no-calling">
-      <div class="org-name {{ odd_even }} {% if loop.first %}on-top{% endif %}">{% if loop.first %}No calling{% endif %}
-      </div>
       <div class="person-image" style="background-image: url(../photos/solo-{{ member.id }}-large.jpg);"></div>
       <div class="person-name">
         {{ member.spokenName }}
