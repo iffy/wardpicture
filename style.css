@@ -1,42 +1,57 @@
-hr {
+.page-break {
+  clear: both;
+  page-break-after: always;
+}
+.line-break {
   clear: both;
 }
-.organizations {
-  clear: both;
-}
-.org,
-.no-calling {
-  border: 1px solid lightgrey;
+.org-name {
+  font-size: 1.3rem;
+  font-family: Helvetica;
+  position: absolute;
   padding: 0.1rem;
-  margin: 0.02in;
-  border-radius: 4px;
-  page-break-inside: avoid;
-  float: left;
+  top: -1.6rem;
+  left: 0px;
+  text-align: left;
+  height: 1.5rem;
+  overflow-x: visible;
+  margin-bottom: 1rem;
+  white-space: nowrap;
+  z-index: 1;
 }
-.org-title {
-  font-size: 2rem;
-  margin-top: 0.1rem;
-  text-align: center;
+.org-name.on-top {
+  z-index: 2;
 }
-.org-people {
-  display: flex;
-  flex-wrap: wrap;
+.org-name.odd {
+}
+.org-name.even {
+  min-width: 1.1in;
 }
 .person {
   border: 0px solid lightgrey;
+  border-width: 1px 0;
   background: rgba(0, 0, 0, 0.02);
-  margin: 0.02in;
+  margin: 0;
   padding: 0in;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  width: 1in;
+  width: 0.9in;
   position: relative;
+  margin-top: 1.5rem;
+  height: 1.8in;
+  float: left;
+  page-break-inside: avoid;
+}
+.person.start {
+  border-left: 6px solid lightgrey;
+}
+.person:last-child {
+  border-right-width: 1px;
+}
+.person.no-calling {
+  height: 1.3in;
 }
 .person-image {
-  height: 1in;
-  width: 1in;
+  height: 0.9in;
+  width: 0.9in;
   background-image: url(../../greycircle.png);
   background-size: cover;
   background-repeat: no-repeat;

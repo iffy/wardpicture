@@ -333,7 +333,6 @@ DEACONS_QUORUM_PRESIDENCY
 TEACHERS_QUORUM_PRESIDENCY
 PRIESTS_QUORUM_PRESIDENCY
 
-# Scouts
 BOY_SCOUTS
 ELEVEN_YEAR_OLD_SCOUTS
 VARSITY
@@ -351,10 +350,10 @@ BISHOPRIC
 RELIEF_SOCIETY_PRESIDENCY
 RELIEF_SOCIETY
 VISITING_TEACHING
-TEACHERS
-COMPASSIONATE_SERVICE
 MUSIC_RELIEF_SOCIETY
+TEACHERS
 MEETINGS
+COMPASSIONATE_SERVICE
 
 # HP
 HIGH_PRIESTS_GROUP_LEADERSHIP
@@ -362,26 +361,22 @@ HIGH_PRIESTS_GROUP
 HOME_TEACHING_DISTRICT_SUPERVISORS_HIGH_PRIESTS_GROUP
 INSTRUCTORS_HIGH_PRIESTS_GROUP
 
-# Elders
 ELDERS_QUORUM_PRESIDENCY
 HOME_TEACHING_DISTRICT_SUPERVISORS_ELDERS_QUORUM
 INSTRUCTORS_ELDERS_QUORUM
 
 # Missionary
 WARD_MISSIONARIES
+MISSIONARY_PREPARATION
 
 FAMILY_HISTORY
 TEMPLE_AND_FAMILY_HISTORY
-
-EMPLOYMENT_AND_WELFARE_STAKE
-EMPLOYMENT_AND_WELFARE_WARD_BRANCH
-FACILITIES_WARD_BRANCH
 
 # Sunday School
 SUNDAY_SCHOOL_PRESIDENCY
 SUNDAY_SCHOOL
 GOSPEL_DOCTRINE
-MISSIONARY_PREPARATION
+
 UNASSIGNED_TEACHERS_SUNDAY_SCHOOL
 LIBRARY
 
@@ -392,15 +387,22 @@ STAKE_YOUNG_WOMEN_PRESIDENCY
 STAKE_PRIMARY_PRESIDENCY
 MUSIC_STAKE
 
-# Music
 MUSIC_WARD_BRANCH
 MUSIC_PRIMARY
 
-# Other
 OTHER_CALLINGS
 TECHNOLOGY_WARD_BRANCH
 YOUNG_SINGLE_ADULT_WARD_BRANCH
+EMPLOYMENT_AND_WELFARE_STAKE
+EMPLOYMENT_AND_WELFARE_WARD_BRANCH
+FACILITIES_WARD_BRANCH
 '''.split('\n')
+
+linebreak_before = [
+'DEACONS_QUORUM_PRESIDENCY',
+'BISHOPRIC',
+]
+
 
 def sortbyPref(pref):
     def getIndex(a):
@@ -439,6 +441,16 @@ def mapCallings(client, data_dir='data', template_root='templates'):
     no_calling = client.getRawValue('members_without_callings')
     no_calling = [x for x in no_calling if x['age'] >= 12]
 
+    # find page breaks
+    break_before = []
+    break_on_next = False
+    for item in prefOrder:
+        if item.startswith('#'):
+            break_on_next = True
+        elif break_on_next:
+            break_before.append(item.strip())
+            break_on_next = False
+
     calling_counts = defaultdict(lambda:0)
     orgs = []
     sub_org_callings = defaultdict(list)
@@ -459,7 +471,9 @@ def mapCallings(client, data_dir='data', template_root='templates'):
         organizations=orgs,
         missing=missing_callings,
         calling_counts=calling_counts,
-        no_calling=no_calling).encode('utf-8'))
+        no_calling=no_calling,
+        linebreak_before=linebreak_before,
+        break_before=break_before).encode('utf-8'))
     print 'wrote', fp.path
 
 
