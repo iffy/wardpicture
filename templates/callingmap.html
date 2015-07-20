@@ -32,11 +32,11 @@
         </div>
         
         <div class="person-image" style="background-image: url(../photos/solo-{{ calling.id }}-large.jpg);"></div>
-        <div class="calling-position">
-          {{ calling.position|abbr }}
-        </div>
         <div class="person-name">
           {{ calling.spokenName }}
+        </div>
+        <div class="calling-position">
+          {{ calling.position|abbr }}
         </div>
         {% if calling_counts[calling.id] > 1 %}
         <div class="has-other-calling"></div>

@@ -36,7 +36,7 @@
   width: 0.9in;
   position: relative;
   margin-top: 1.5rem;
-  height: 1.8in;
+  height: 1.3in;
   float: left;
   page-break-inside: avoid;
 }
@@ -56,6 +56,8 @@
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center center;
+  position: relative;
+  z-index: 2;
 }
 .calling-position {
   text-align: center;
@@ -73,7 +75,13 @@
   left: 1px;
 }
 .person-name {
+  position: absolute;
+  bottom: 0.3in;
+  left: 0;
   text-align: center;
+  width: 0.9in;
+  height: 0.9in;
   font-style: italic;
   padding: 0 0.1rem;
+  z-index: 1;
 }
