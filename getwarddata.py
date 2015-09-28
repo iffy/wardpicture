@@ -6,6 +6,8 @@ import json
 import sys
 import time
 import argparse
+from ordereddict import OrderedDict
+import math
 from collections import defaultdict
 from filepath import FilePath
 from jinja2 import Environment, FileSystemLoader
@@ -337,6 +339,7 @@ BOY_SCOUTS
 ELEVEN_YEAR_OLD_SCOUTS
 VARSITY
 VENTURING
+ACTIVITIES_AND_SPORTS_YOUNG_MEN
 
 # Cubs
 ACTIVITY_DAYS
@@ -368,6 +371,7 @@ INSTRUCTORS_ELDERS_QUORUM
 # Missionary
 WARD_MISSIONARIES
 MISSIONARY_PREPARATION
+Full-Time Missionaries
 
 FAMILY_HISTORY
 TEMPLE_AND_FAMILY_HISTORY
@@ -396,6 +400,7 @@ YOUNG_SINGLE_ADULT_WARD_BRANCH
 EMPLOYMENT_AND_WELFARE_STAKE
 EMPLOYMENT_AND_WELFARE_WARD_BRANCH
 FACILITIES_WARD_BRANCH
+OTHER
 '''.split('\n')
 
 linebreak_before = [
@@ -434,6 +439,7 @@ def mapCallings(client, data_dir='data', template_root='templates'):
         output_root.makedirs()
     jenv = Environment(loader=FileSystemLoader(template_root))
     jenv.filters['abbr'] = abbreviateCalling
+    jenv.globals['math'] = math
     template = jenv.get_template('callingmap.html')
     
     #members = client.getRawValue('member_list')
@@ -441,39 +447,30 @@ def mapCallings(client, data_dir='data', template_root='templates'):
     no_calling = client.getRawValue('members_without_callings')
     no_calling = [x for x in no_calling if x['age'] >= 12]
 
-    # find page breaks
-    break_before = []
-    break_on_next = False
-    for item in prefOrder:
-        if item.startswith('#'):
-            break_on_next = True
-        elif break_on_next:
-            break_before.append(item.strip())
-            break_on_next = False
-
+    # get the groups and subgroups organized into dicts
+    groups = OrderedDict()
+    by_suborg = {}
+    for line in prefOrder:
+        if line.startswith('#'):
+            # heading
+            groups[line[1:].strip()] = OrderedDict()
+        elif line.strip():
+            subgroup_key = line.strip()
+            groups[groups.keys()[-1]][subgroup_key] = by_suborg[subgroup_key] = []
+    
+    # put each calling into the right subgroup
+    # also count the number of callings per person
     calling_counts = defaultdict(lambda:0)
-    orgs = []
-    sub_org_callings = defaultdict(list)
-    missing_callings = []
     for calling in callings:
-        sub_org_callings[calling['subOrgType']].append(calling)
+        suborg = calling['subOrgType'] or calling['organization']
+        by_suborg[suborg].append(calling)
         calling_counts[calling['id']] += 1
-
-    for key in sorted(sub_org_callings.keys(), sortbyPref(prefOrder)):
-        orgs.append({
-            'subtype': key,
-            'callings': sub_org_callings[key],
-        })
-        print key
 
     fp = output_root.child('callingmap.html')
     fp.setContent(template.render(
-        organizations=orgs,
-        missing=missing_callings,
+        orgs=groups,
         calling_counts=calling_counts,
-        no_calling=no_calling,
-        linebreak_before=linebreak_before,
-        break_before=break_before).encode('utf-8'))
+        no_calling=no_calling).encode('utf-8'))
     print 'wrote', fp.path
 
 
@@ -483,25 +480,30 @@ if __name__ == '__main__':
     parser.add_argument('--update-photos', '-p', dest='update_photos', action='store_true')
     parser.add_argument('--template-dir', '-t', dest='template_dir', default='templates')
     parser.add_argument('--username', '-u', dest='username')
+    parser.add_argument('--no-connect', '-n', dest='connect', action='store_false')
 
     parser.add_argument('data_dir', nargs='?', default='data')
+    parser.set_defaults(username=os.environ.get('LDS_USERNAME', None))
+    parser.set_defaults(password=os.environ.get('LDS_PASSWORD', None))
 
     args = parser.parse_args()
 
-    args.username = args.username or os.environ.get('LDS_USERNAME', None)
-    args.password = os.environ.get('LDS_PASSWORD', None)
-
-    if not args.username:
-        args.username = raw_input('Username: ')
-    if not args.password:
-        args.password = getpass.getpass('Password: ')
+    if args.connect:
+        if not args.username:
+            args.username = raw_input('Username: ')
+        if not args.password:
+            args.password = getpass.getpass('Password: ')
 
     client = LDSClient(args.data_dir, args.username, args.password)
-    client.updateRawData()
-    if args.update_photos:
-        client.updatePhotos()
+
+    if args.connect:
+        client.updateRawData()
+        if args.update_photos:
+            client.updatePhotos()
+        else:
+            print 'skipping photo update (pass --update-photos if you want to update them)'
     else:
-        print 'skipping photo update (pass --update-photos if you want to update them)'
+        print 'skipping connection to lds.org'
 
     mapCallings(client, args.data_dir, args.template_dir)
 

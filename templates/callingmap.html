@@ -6,61 +6,45 @@
 </head>
 <body>
 
-<div class="organizations">
-  {% set last_org = '' %}
-  {% set odd_even_cycler = cycler('odd', 'even') %}
-  {% set odd_even = 'odd' %}
-
-  {% for org in organizations %}
-    {% for calling in org.callings %}
-      {% set new_org = (last_org != org.subtype) %}
-      {% set last_org = org.subtype %}
-      {% set last_in_org = loop.last %}
-
-      {% if new_org %}
-        {% set odd_even = odd_even_cycler.next() %}
-      {% endif %}
-      {% if org.subtype in break_before and new_org %}
-        <div class="page-break"></div>
-      {% elif org.subtype in linebreak_before and new_org %}
-        <div class="line-break"></div>
-      {% endif %}
-      <div class="person {% if new_org %}start{% endif %} {{ odd_even }} {% if last_in_org %}end{% endif %}">
-        <div class="org-name {% if new_org %}on-top{% endif %}">
-        {% if new_org %}
-          {{ org.subtype|abbr }}
-        {% endif %}
+{% for org_name, suborgs in orgs.items() %}
+<div class="organization">
+  <div class="org-name">{{ org_name|abbr }}</div>
+  <div class="sub-orgs">
+  {% for sub_name, callings in suborgs.items() %}
+    <div class="sub-org">
+      <div class="sub-org-name">{{ sub_name|abbr }}</div>
+      <div class="callings sw{{ math.ceil(callings|length/2)|int }}">
+        {% for calling in callings %}
+        <div class="calling">
+          <div class="person-image" style="background-image: url(../photos/solo-{{ calling.id }}-large.jpg);"></div>
+          <div class="person-name">{{ calling.spokenName }}</div>
+          <div class="calling-position">{{ calling.position|abbr }}</div>
+          {% if calling_counts[calling.id] > 1 %}
+          <div class="has-other-calling"></div>
+          {% endif %}
         </div>
-        
-        <div class="person-image" style="background-image: url(../photos/solo-{{ calling.id }}-large.jpg);"></div>
-        <div class="person-name">
-          {{ calling.spokenName }}
-        </div>
-        <div class="calling-position">
-          {{ calling.position|abbr }}
-        </div>
-        {% if calling_counts[calling.id] > 1 %}
-        <div class="has-other-calling"></div>
-        {% endif %}
-      </div>
-    {% endfor %}
-  {% endfor %}
-
-  {% set odd_even = odd_even_cycler.next() %}
-  <div class="page-break"></div>
-
-  <div>No calling</div>
-  {% for member in no_calling %}
-    <div class="person {% if loop.first %}start{% endif %} no-calling">
-      <div class="person-image" style="background-image: url(../photos/solo-{{ member.id }}-large.jpg);"></div>
-      <div class="person-name">
-        {{ member.spokenName }}
+        {% endfor %}
       </div>
     </div>
   {% endfor %}
   </div>
+</div>
+{% endfor %}
 
-
+<div class="organization">
+  <div class="org-name">No calling</div>
+  <div class="sub-orgs">
+    <div class="sub-org">
+      <div class="callings">
+        {% for calling in no_calling %}
+        <div class="calling">
+          <div class="person-image" style="background-image: url(../photos/solo-{{ calling.id }}-large.jpg);"></div>
+          <div class="person-name">{{ calling.spokenName }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
 </div>
 
 </body>

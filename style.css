@@ -1,105 +1,104 @@
 * {
   box-sizing: border-box;
 }
-.page-break {
-  clear: both;
+
+.organization {
   page-break-after: always;
-}
-.line-break {
   clear: both;
 }
+
+.organization:after {
+  clear: both;
+}
+.organization:before {
+  clear: both;
+}
+
 .org-name {
-  font-size: 1.3rem;
+  font-size: 18px;
   font-family: Helvetica;
-  position: absolute;
-  padding: 0.1rem;
-  top: -1.6rem;
-  left: 0px;
-  text-align: left;
-  height: 1.5rem;
-  overflow-x: visible;
-  margin-bottom: 1rem;
-  white-space: nowrap;
-  z-index: 1;
-  color: darkgrey;
+  margin-left: 0.1in;
+  clear: both;
 }
-.org-name.on-top {
-  z-index: 2;
+
+.sub-orgs {
+
 }
-.person {
-  border: 0px solid black;
-  border-width: 0px 0;
-  margin: 0;
-  padding: 0in;
-  width: 0.9in;
-  position: relative;
-  margin-top: 1.5rem;
-  height: 1.25in;
+
+.sub-org {
+  border: 1px solid lightgrey;
   float: left;
+  margin: 0.1in;
+  padding: 0.05in 0;
   page-break-inside: avoid;
-  box-sizing: border-box;
 }
-.person.start {
+
+.w2 {
+  width: 180px;
 }
-.person.end {
-  margin-right: 1rem;
+.w3 {
+  width: 270px;
 }
-.person.no-calling {
-  height: 0.9in;
-  margin-top: 0;
+.w4 {
+  width: 360px;
 }
-.person.no-calling .person-name {
-  top: 0.2in;
+.w5 {
+  width: 450px;
 }
-.person.odd {
-  background-color: rgba(0, 0, 0, 0.15);
+
+.sub-org-name {
+  text-align: center;
+  padding-bottom: 0.05in;
 }
-.person.even {
-  background-color: white;
-  border-top-width: 2px;
-  border-bottom-width: 2px;
+
+.calling {
+  width: 90px;
+  height: 140px;
+  position: relative;
+  float: left;
 }
-.person.even.start {
-  border-left-width: 2px;
-}
-.person.even.end {
-  border-right-width: 2px;
-}
+
 .person-image {
-  height: 0.9in;
-  /*width: 0.9in;*/
+  height: 90px;
+  width: 90px;
+  position: relative;
+  z-index: 3;
   background-image: url(../../greycircle.png);
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center center;
-  position: relative;
-  z-index: 2;
 }
+
+.has-other-calling {
+  position: absolute;
+  border: 1px solid black;
+  background: white;
+  width: 6px;
+  height: 6px;
+  border-radius: 100px;
+  top: 2px;
+  left: 2px;
+  z-index: 3;
+}
+.person-name {
+  width: 90px;
+  text-align: center;
+  font-style: italic;
+  padding: 0 0.1rem;
+  z-index: 2;
+  line-height: 90%;
+}
+
 .calling-position {
+  width: 90px;
   text-align: center;
   font-family: Helvetica;
   font-size: 10pt;
   padding: 0 0.1rem;
 }
-.has-other-calling {
-  position: absolute;
-  border: 1px solid black;
-  background: black;
-  width: 4px;
-  height: 4px;
-  border-radius: 100px;
-  top: 1px;
-  left: 1px;
-  z-index: 3;
-}
-.person-name {
-  position: absolute;
-  bottom: 0.1in;
-  left: 0;
-  text-align: center;
-  width: 0.9in;
-  height: 0.9in;
-  font-style: italic;
-  padding: 0 0.1rem;
-  z-index: 1;
+
+@media print {
+  .organization {
+    page-break-after: always;
+  }
 }
