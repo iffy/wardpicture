@@ -194,8 +194,14 @@ class LDSClient(object):
         s = self.authenticate()
         self.log('Getting photos...')
         for member_ids in xAtATime(self._memberIDsWithNoPhoto(size), 19):
-            r = s.get('https://www.lds.org/directory/services/ludrs/photo/url/'+','.join(map(str, member_ids))+'/individual')
-            data = r.json()
+            if not member_ids:
+                continue
+            try:
+                r = s.get('https://www.lds.org/directory/services/ludrs/photo/url/'+','.join(map(str, member_ids))+'/individual')
+                data = r.json()
+            except ValueError:
+                print 'Error on', member_ids
+                raise
             for member_id, result in zip(member_ids, data):
                 fp = self._memberPhotoFilePath(member_id, size)
                 uri = result[size + 'Uri']
@@ -318,6 +324,7 @@ VALIANT_10
 VALIANT_11
 COURSE_13
 COURSE_15
+UNASSIGNED_TEACHERS_PRIMARY
 
 # YW
 YOUNG_WOMEN_PRESIDENCY
@@ -490,9 +497,9 @@ if __name__ == '__main__':
 
     if args.connect:
         if not args.username:
-            args.username = raw_input('Username: ')
+            args.username = raw_input('(blank LDS_USERNAME) Username: ')
         if not args.password:
-            args.password = getpass.getpass('Password: ')
+            args.password = getpass.getpass('(blank LDS_PASSWORD) Password: ')
 
     client = LDSClient(args.data_dir, args.username, args.password)
 
